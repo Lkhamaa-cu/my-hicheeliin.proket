@@ -16,7 +16,7 @@ export default function Home() {
 
           <nav className="hidden md:flex gap-8 text-sm font-medium">
             <a href="#features" className="hover:text-blue-600 transition">Онцлог</a>
-            <a href="#jobs" className="hover:text-blue-600 transition">Ажлууд</a>
+            <a href="jobs" className="hover:text-blue-600 transition">Ажлууд</a>
             <a href="#about" className="hover:text-blue-600 transition">Бидний тухай</a>
           </nav>
 

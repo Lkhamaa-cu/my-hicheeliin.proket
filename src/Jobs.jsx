@@ -10,13 +10,13 @@ export default function JobsPage() {
     getJobs().then(setJobs)
   }, [])
 
-  // 🔴 Устгах
+  
   const handleDelete = async (id) => {
-    await deleteJob(id)
+    await deleteJob(id) 
     setJobs(jobs.filter(j => j.id !== id))
   }
 
-  // 🟡 Засварлах товч дарахад form-д утга оруулах
+
   const handleEditClick = (job) => {
     setEditingJob({ ...job })
   }
