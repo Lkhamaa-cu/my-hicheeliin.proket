@@ -34,3 +34,4 @@ export const deleteJob = async (id) => {
   })
   return res.json()
 }
+

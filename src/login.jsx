@@ -1,16 +1,41 @@
 import { useState } from "react";
-import { Routes, Route, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
+
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+    setLoading(true);
 
-    console.log({ email, password });
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
-    // redirect (жишээ)
-    window.location.href = "/Dashboard.html";
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Нэвтрэх үед алдаа гарлаа");
+        setLoading(false);
+        return;
+      }
+
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      window.location.href = "/dashboard";
+
+    } catch (err) {
+      setError("Сервертэй холбогдож чадсангүй");
+      setLoading(false);
+    }
   };
 
   return (
@@ -23,7 +48,6 @@ export default function Login() {
           className="object-cover w-full h-full"
           alt="bg"
         />
-
         <div className="absolute inset-0 bg-gradient-to-t from-blue-900/60 to-transparent flex items-end p-12">
           <div className="text-white">
             <h2 className="text-4xl font-bold mb-4">Тавтай морилно уу!</h2>
@@ -76,11 +100,8 @@ export default function Login() {
               <div>
                 <div className="flex justify-between mb-1">
                   <label>Нууц үг</label>
-                  <a href="#" className="text-sm text-blue-600">
-                    Мартсан?
-                  </a>
+                  <a href="#" className="text-sm text-blue-600">Мартсан?</a>
                 </div>
-
                 <div className="relative">
                   <span className="absolute left-3 top-3">🔒</span>
                   <input
@@ -94,13 +115,22 @@ export default function Login() {
                 </div>
               </div>
 
+              {/* ERROR */}
+              {error && (
+                <p className="text-red-500 text-sm text-center bg-red-50 border border-red-100 p-2 rounded">
+                  ⚠️ {error}
+                </p>
+              )}
+
               {/* BUTTON */}
               <button
                 type="submit"
-                className="w-full bg-blue-600 text-white h-12 rounded"
+                disabled={loading}
+                className="w-full bg-blue-600 text-white h-12 rounded disabled:opacity-60"
               >
-                Нэвтрэх
+                {loading ? "Түр хүлээнэ үү..." : "Нэвтрэх"}
               </button>
+
             </form>
 
             {/* OR */}

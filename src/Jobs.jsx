@@ -12,7 +12,7 @@ const JOB_ICONS = [
   
 ]
 
-const PER_PAGE = 8
+const PER_PAGE = 10
 
 export default function JobsPage() {
   const [jobs, setJobs]             = useState([])
@@ -205,7 +205,7 @@ export default function JobsPage() {
 
 
 function JobCard({ job, icon, isEditing, editForm, setEditForm, onEditClick, onSave, onCancel, onDelete, typeStyles }) {
-  const typeClass = typeStyles[job.time] || 'bg-gray-100 text-gray-600 border-gray-200'
+  const typeClass = typeStyles[job.time] || 'bg-yellow-200 text-gray-600 border-gray-200'
 
   return (
     <div className={`bg-white rounded-2xl border transition-all duration-150 ${isEditing ? 'border-blue-300' : 'border-gray-200 hover:border-gray-300'}`}>

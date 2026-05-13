@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Routes, Route, Link } from "react-router-dom";
 
 export default function Register() {
   const [form, setForm] = useState({
@@ -10,20 +9,48 @@ export default function Register() {
     password: "",
     confirm_password: "",
   });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
 
-    console.log(form);
+    if (form.password !== form.confirm_password) {
+      setError("Нууц үг таарахгүй байна");
+      return;
+    }
 
-    // энд backend холбоно
+    setLoading(true);
+
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Бүртгүүлэх үед алдаа гарлаа");
+        setLoading(false);
+        return;
+      }
+
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      window.location.href = "/dashboard";
+
+    } catch (err) {
+      setError("Сервертэй холбогдож чадсангүй");
+      setLoading(false);
+    }
   };
 
   return (
@@ -53,7 +80,6 @@ export default function Register() {
               <div>
                 <p className="mb-2">Та хэн бэ?</p>
                 <div className="grid grid-cols-2 gap-4">
-
                   <label className="border p-4 rounded text-center cursor-pointer">
                     <input
                       type="radio"
@@ -65,7 +91,6 @@ export default function Register() {
                     />
                     👤 Ажил хайгч
                   </label>
-
                   <label className="border p-4 rounded text-center cursor-pointer">
                     <input
                       type="radio"
@@ -77,7 +102,6 @@ export default function Register() {
                     />
                     🏢 Ажил олгогч
                   </label>
-
                 </div>
               </div>
 
@@ -163,12 +187,20 @@ export default function Register() {
                 </div>
               </div>
 
+              {/* ERROR */}
+              {error && (
+                <p className="text-red-500 text-sm text-center bg-red-50 border border-red-100 p-2 rounded">
+                  ⚠️ {error}
+                </p>
+              )}
+
               {/* BUTTON */}
               <button
                 type="submit"
-                className="w-full bg-blue-600 text-white h-12 rounded"
+                disabled={loading}
+                className="w-full bg-blue-600 text-white h-12 rounded disabled:opacity-60"
               >
-                Бүртгүүлэх
+                {loading ? "Түр хүлээнэ үү..." : "Бүртгүүлэх"}
               </button>
 
             </form>
@@ -204,12 +236,9 @@ export default function Register() {
           className="object-cover w-full h-full"
           alt="register"
         />
-
         <div className="absolute inset-0 bg-gradient-to-t from-purple-900/60 to-transparent flex items-end p-12">
           <div className="text-white">
-            <h2 className="text-4xl font-bold mb-4">
-              Өөрийн цагаа удирд!
-            </h2>
+            <h2 className="text-4xl font-bold mb-4">Өөрийн цагаа удирд!</h2>
             <p className="text-xl text-purple-100">
               Цагийн ажил, орлого, цаг бүртгэл бүгд нэг дор
             </p>

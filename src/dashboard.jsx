@@ -1,21 +1,17 @@
-import { useState, useEffect } from "react";
-import Chart from "chart.js/auto";
+import { useState, useEffect, useRef } from "react";
+import { Chart, registerables } from "chart.js";
+Chart.register(...registerables);
 
-export default function Dashboard() {
+
+function useTimer() {
   const [seconds, setSeconds] = useState(0);
   const [running, setRunning] = useState(false);
-  const [activeTab, setActiveTab] = useState("available");
 
-  // TIMER
   useEffect(() => {
     let interval;
-
     if (running) {
-      interval = setInterval(() => {
-        setSeconds((prev) => prev + 1);
-      }, 1000);
+      interval = setInterval(() => setSeconds((s) => s + 1), 1000);
     }
-
     return () => clearInterval(interval);
   }, [running]);
 
@@ -26,132 +22,393 @@ export default function Dashboard() {
     return `${h}:${m}:${s}`;
   }
 
-  // CHARTS
+  function reset() {
+    setRunning(false);
+    setSeconds(0);
+  }
+
+  return { seconds, running, setRunning, formatTime, reset };
+}
+
+// =====================
+// JOB CARD
+// =====================
+function JobCard({ job }) {
+  const [applied, setApplied] = useState(false);
+  const daysLabel =
+    job.postedDays === 1 ? "Өчигдөр" : `${job.postedDays} өдрийн өмнө`;
+
+  return (
+    <div className="bg-white border border-gray-100 rounded-2xl p-4 flex flex-col gap-2 hover:shadow-md transition-shadow duration-200">
+      <div className="flex items-start justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-2xl">{job.icon}</span>
+          <div>
+            <h3 className="font-semibold text-gray-900 text-sm leading-tight">
+              {job.title}
+            </h3>
+            <p className="text-xs text-gray-400">{job.company}</p>
+          </div>
+        </div>
+        {job.postedDays <= 1 && (
+          <span className="text-xs bg-blue-50 text-blue-600 font-medium px-2 py-0.5 rounded-full border border-blue-100">
+            Шинэ
+          </span>
+        )}
+      </div>
+
+      <p className="text-blue-600 font-bold text-base">{job.price}</p>
+
+      <div className="flex flex-wrap gap-2">
+        <span className="text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded-lg">
+          🕐 {job.time}
+        </span>
+        <span className="text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded-lg">
+          📍 {job.location}
+        </span>
+        <span className="text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded-lg">
+          🗓 {daysLabel}
+        </span>
+      </div>
+
+      <p className="text-xs text-gray-400 border-t border-gray-50 pt-2 leading-relaxed">
+        {job.details}
+      </p>
+
+      <button
+        onClick={() => setApplied(true)}
+        disabled={applied}
+        className={`mt-auto w-full py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
+          applied
+            ? "bg-green-50 text-green-600 border border-green-100 cursor-default"
+            : "bg-blue-600 text-white hover:bg-blue-700 active:scale-95"
+        }`}
+      >
+        {applied ? "✓ Өргөдөл илгээгдлээ" : "Өргөдөл гаргах"}
+      </button>
+    </div>
+  );
+}
+
+// =====================
+// STAT CARD
+// =====================
+function StatCard({ label, value, sub }) {
+  return (
+    <div className="bg-white border border-gray-100 rounded-2xl p-4">
+      <p className="text-xs text-gray-400 mb-1">{label}</p>
+      <p className="text-xl font-bold text-gray-900">{value}</p>
+      {sub && <p className="text-xs text-gray-400 mt-0.5">{sub}</p>}
+    </div>
+  );
+}
+
+// =====================
+// ANALYTICS TAB
+// =====================
+function AnalyticsTab({ analytics }) {
+  const chart1Ref = useRef(null);
+  const chart2Ref = useRef(null);
+  const instance1 = useRef(null);
+  const instance2 = useRef(null);
+
   useEffect(() => {
-    const ctx1 = document.getElementById("chart1");
-    const ctx2 = document.getElementById("chart2");
+    if (!analytics) return;
+    instance1.current?.destroy();
+    instance2.current?.destroy();
 
-    if (!ctx1 || !ctx2) return;
-
-    const chart1 = new Chart(ctx1, {
+    instance1.current = new Chart(chart1Ref.current, {
       type: "bar",
       data: {
-        labels: ["Даваа", "Мягмар", "Лхагва", "Пүрэв"],
-        datasets: [{ data: [6, 8, 7, 9] }],
+        labels: analytics.weekly.labels,
+        datasets: [
+          {
+            label: "Цаг",
+            data: analytics.weekly.hours,
+            backgroundColor: "#2563eb",
+            borderRadius: 8,
+            borderSkipped: false,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          title: {
+            display: true,
+            text: "Долоо хоногийн ажилласан цаг",
+            font: { size: 13 },
+            color: "#6b7280",
+          },
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: { color: "rgba(0,0,0,0.04)" },
+            ticks: { color: "#9ca3af" },
+          },
+          x: { grid: { display: false }, ticks: { color: "#9ca3af" } },
+        },
       },
     });
 
-    const chart2 = new Chart(ctx2, {
+    instance2.current = new Chart(chart2Ref.current, {
       type: "line",
       data: {
-        labels: ["1-р сар", "2-р сар", "3-р сар"],
-        datasets: [{ data: [450000, 520000, 680000] }],
+        labels: analytics.monthly.labels,
+        datasets: [
+          {
+            label: "Орлого (₮)",
+            data: analytics.monthly.income,
+            borderColor: "#2563eb",
+            backgroundColor: "rgba(37,99,235,0.08)",
+            tension: 0.4,
+            fill: true,
+            pointBackgroundColor: "#2563eb",
+            pointRadius: 5,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          title: {
+            display: true,
+            text: "Сарын орлого",
+            font: { size: 13 },
+            color: "#6b7280",
+          },
+        },
+        scales: {
+          y: {
+            beginAtZero: false,
+            grid: { color: "rgba(0,0,0,0.04)" },
+            ticks: { color: "#9ca3af" },
+          },
+          x: { grid: { display: false }, ticks: { color: "#9ca3af" } },
+        },
       },
     });
 
     return () => {
-      chart1.destroy();
-      chart2.destroy();
+      instance1.current?.destroy();
+      instance2.current?.destroy();
     };
-  }, []);
+  }, [analytics]);
 
   return (
-    <div className="flex bg-gray-50 min-h-screen">
+    <div className="flex flex-col gap-4">
+      <div className="bg-white border border-gray-100 rounded-2xl p-4">
+        <canvas ref={chart1Ref} />
+      </div>
+      <div className="bg-white border border-gray-100 rounded-2xl p-4">
+        <canvas ref={chart2Ref} />
+      </div>
+    </div>
+  );
+}
 
-      {/* SIDEBAR */}
-      <aside className="w-64 bg-white h-screen p-6 hidden lg:block border-r relative">
-        <h1 className="text-2xl font-bold mb-8">⏰ Цагийн ажил</h1>
+// =====================
+// HISTORY TAB
+// =====================
+function HistoryTab({ history }) {
+  return (
+    <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden">
+      <div className="px-5 py-4 border-b border-gray-50">
+        <h2 className="font-semibold text-gray-800">Ажлын түүх</h2>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="bg-gray-50 text-xs text-gray-400 uppercase tracking-wide">
+              <th className="text-left px-5 py-3 font-medium">Ажил</th>
+              <th className="text-left px-5 py-3 font-medium">Компани</th>
+              <th className="text-left px-5 py-3 font-medium">Цаг</th>
+              <th className="text-left px-5 py-3 font-medium">Орлого</th>
+              <th className="text-left px-5 py-3 font-medium">Огноо</th>
+              <th className="text-left px-5 py-3 font-medium">Төлөв</th>
+            </tr>
+          </thead>
+          <tbody>
+            {history.map((row, i) => (
+              <tr
+                key={row.id}
+                className={i % 2 === 0 ? "bg-white" : "bg-gray-50/50"}
+              >
+                <td className="px-5 py-3 font-medium text-gray-800">{row.title}</td>
+                <td className="px-5 py-3 text-gray-500">{row.company}</td>
+                <td className="px-5 py-3 text-gray-500">
+                  {row.hours ? `${row.hours} ц` : "—"}
+                </td>
+                <td className="px-5 py-3 font-semibold text-blue-600">{row.income}</td>
+                <td className="px-5 py-3 text-gray-400 text-xs">{row.date}</td>
+                <td className="px-5 py-3">
+                  <span className="text-xs bg-green-50 text-green-600 px-2 py-0.5 rounded-full border border-green-100">
+                    {row.status}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
 
-        <nav className="space-y-3">
-          <button onClick={() => setActiveTab("available")} className="block w-full text-left">
-            🏠 Нүүр
-          </button>
-          <button onClick={() => setActiveTab("history")} className="block w-full text-left">
-            💼 Ажлууд
-          </button>
-          <button onClick={() => setActiveTab("analytics")} className="block w-full text-left">
-            📊 Тайлан
-          </button>
+
+const navItems = [
+  { key: "available", label: "Нүүр", icon: "🏠" },
+  { key: "history", label: "Ажлууд", icon: "💼" },
+  { key: "analytics", label: "Тайлан", icon: "📊" },
+];
+
+
+export default function Dashboard() {
+  const [activeTab, setActiveTab] = useState("available");
+  const { seconds, running, setRunning, formatTime, reset } = useTimer();
+
+  // ---- DB.JSON FETCH ----
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetch("http://localhost:5000/api/jobs")
+      .then((res) => {
+        if (!res.ok) throw new Error("db.json уншихад алдаа гарлаа");
+        return res.json();
+      })
+      .then((jobs) => {
+        setData({jobs});
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <p className="text-gray-400 text-sm animate-pulse">Ачааллаж байна...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <p className="text-red-400 text-sm">⚠️ {error}</p>
+      </div>
+    );
+  }
+
+  const { jobs, history, stats, analytics } = data;
+
+  return (
+    <div className="flex bg-gray-50 min-h-screen font-sans">
+      {/* ---- SIDEBAR ---- */}
+      <aside className="w-60 bg-white min-h-screen flex flex-col border-r border-gray-100 px-4 py-6 sticky top-0 h-screen">
+        <div className="flex items-center gap-2 px-2 mb-8">
+          <span className="text-2xl">⏰</span>
+          <span className="font-bold text-gray-900 text-base">Цагийн ажил</span>
+        </div>
+
+        <nav className="flex flex-col gap-1 flex-1">
+          {navItems.map((item) => (
+            <button
+              key={item.key}
+              onClick={() => setActiveTab(item.key)}
+              className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm text-left transition-all duration-150 ${
+                activeTab === item.key
+                  ? "bg-blue-50 text-blue-700 font-semibold"
+                  : "text-gray-500 hover:bg-gray-50 hover:text-gray-800"
+              }`}
+            >
+              <span className="text-base">{item.icon}</span>
+              {item.label}
+            </button>
+          ))}
         </nav>
 
-        <a href="/" className="absolute bottom-6 text-red-500">
-          🚪 Гарах
-        </a>
+        <div className="border-t border-gray-100 pt-4 mt-4">
+          <div className="flex items-center gap-3 px-3 py-2 mb-3">
+            <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold">
+              Б
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-gray-800">Болд</p>
+              <p className="text-xs text-gray-400">{stats.rating} ⭐ үнэлгээ</p>
+            </div>
+          </div>
+          <a
+            href="/"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-red-400 hover:bg-red-50 hover:text-red-500 transition-all"
+          >
+            🚪 Гарах
+          </a>
+        </div>
       </aside>
 
-      {/* MAIN */}
-      <main className="flex-1 p-6">
-
-        <h1 className="text-3xl font-bold mb-6">Сайн байна уу 👋</h1>
+      {/* ---- MAIN ---- */}
+      <main className="flex-1 p-6 max-w-5xl">
+        <h1 className="text-2xl font-bold text-gray-900 mb-6">
+          Сайн байна уу 👋
+        </h1>
 
         {/* STATS */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          <div className="p-4 rounded shadow">156 цаг</div>
-          <div className="p-4 rounded shadow">1,248,000₮</div>
-          <div className="p-4 rounded shadow">23 ажил</div>
-          <div className="p-4 rounded shadow">4.8 ⭐</div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+          <StatCard label="Нийт цаг" value={`${stats.totalHours} ц`} sub="Энэ сар" />
+          <StatCard label="Орлого" value={stats.totalIncome} sub="+12% өнгөрсөн сараас" />
+          <StatCard label="Гүйцэтгэсэн" value={`${stats.totalJobs} ажил`} />
+          <StatCard label="Үнэлгээ" value={`${stats.rating} ⭐`} sub={`${stats.reviewCount} сэтгэгдэл`} />
         </div>
 
         {/* TIMER */}
-        <div className="bg-blue-600 text-white p-6 rounded mb-6 text-center">
-          <div className="text-5xl mb-4">{formatTime(seconds)}</div>
-
-          <button
-            onClick={() => setRunning(!running)}
-            className="bg-white text-blue-600 px-4 py-2 rounded"
-          >
-            ▶ Start / Stop
-          </button>
+        <div className="bg-blue-600 rounded-2xl p-6 mb-6 flex flex-col items-center gap-4">
+          <p className="text-blue-200 text-xs uppercase tracking-widest">
+            Цагийн тоолуур
+          </p>
+          <div className="text-5xl font-bold text-white tracking-widest tabular-nums">
+            {formatTime(seconds)}
+          </div>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setRunning(!running)}
+              className="bg-white text-blue-600 px-6 py-2 rounded-xl text-sm font-semibold hover:bg-blue-50 active:scale-95 transition-all"
+            >
+              {running ? "⏸ Зогсоох" : "▶ Эхлүүлэх"}
+            </button>
+            <button
+              onClick={reset}
+              className="bg-blue-500 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-blue-400 active:scale-95 transition-all"
+            >
+              ↺ Дахин
+            </button>
+          </div>
         </div>
 
         {/* TABS */}
         {activeTab === "available" && (
-          <div className="grid md:grid-cols-2 gap-4">
-            <div className="bg-white p-4 rounded shadow">
-              <h3 className="font-bold">Нохой салхилуулах</h3>
-              <p>10,000₮/цаг</p>
-            </div>
-
-            <div className="bg-white p-4 rounded shadow">
-              <h3 className="font-bold">Хүүхэд харах</h3>
-              <p>12,000₮/цаг</p>
-            </div>
-
-            <div className="bg-white p-4 rounded shadow">
-              <h3 className="font-bold">Гэр цэвэрлэх</h3>
-              <p>15,000₮</p>
-            </div>
-          </div>
-        )}
-
-        {activeTab === "history" && (
-          <div className="bg-white p-4 rounded shadow">
-            <h2 className="text-xl font-bold mb-4">Ажлын түүх</h2>
-
-            <table className="w-full">
-              <thead>
-                <tr>
-                  <th>Ажил</th>
-                  <th>Орлого</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Нохой</td>
-                  <td>20,000₮</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {activeTab === "analytics" && (
           <div>
-            <canvas id="chart1"></canvas>
-            <canvas id="chart2" className="mt-6"></canvas>
+            <p className="text-sm font-semibold text-gray-500 mb-3">
+              Боломжит ажлууд ({jobs.length})
+            </p>
+            <div className="grid md:grid-cols-2 gap-4">
+              {jobs.map((job) => (
+                <JobCard key={job.id} job={job} />
+              ))}
+            </div>
           </div>
         )}
 
+        {activeTab === "history" && <HistoryTab history={history} />}
+
+        {activeTab === "analytics" && <AnalyticsTab analytics={analytics} />}
       </main>
     </div>
   );
