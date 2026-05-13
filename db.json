@@ -1,53 +1,334 @@
 {
   "jobs": [
     {
-      "id": "1",
-      "title": "Нохой салхилуулах",
-      "price": "5,000₮/цаг",
-      "time": "14:00 - 16:00",
-      "location": "Хан-уул",
-      "details": "Нохойг гадаа салхилуулна, 1-2 нохойтой, 1 цаг тутамд 5,000₮"
-    },
-    {
-      "id": "2",
-      "title": "Дэлгүүр",
-      "price": "7,000₮/цаг",
-      "time": "09:00 - 18:00",
-      "location": "ХУД",
-      "details": "Дэлгүүрт худалдан авалт хийх, бараа зөөх"
-    },
-    {
-      "id": "3",
-      "title": "Цэвэрлэгээ",
-      "price": "10,000₮/цаг",
-      "time": "10:00 - 14:00",
-      "location": "БЗД",
-      "details": "Гэр / оффис цэвэрлэх, тоос соруулах, шалан арчих"
-    },
-    {
-      "id": "4",
-      "title": "Түгээлт",
-      "price": "8,000₮/цаг",
-      "time": "12:00 - 20:00",
-      "location": "ЧД",
-      "details": "Сонгосон газруудад бараа хүргэх, 1-2 хүнтэй баг"
-    },
-    {
-      "id": "5",
-      "title": "Хүүхэд харуулах",
-      "price": "6,000₮/цаг",
-      "time": "15:00 - 19:00",
-      "location": "СБД",
-      "details": "Хүүхэдтэй тоглох, хооллох, унтуулж харих"
-    },
-
-      {
-      "id": "6",
-      "title": "Хүүхэд харуулах",
-      "price": "6,000₮/цаг",
-      "time": "15:00 - 19:00",
-      "location": "СБД",
-      "details": "Хүүхэдтэй тоглох, хооллох, унтуулж харих"
-    }
+    "id": "1",
+    "title": "Нохой салхилуулах",
+    "company": "Happy Pets",
+    "price": "5,000₮/цаг",
+    "priceNum": 5000,
+    "time": "14:00 - 16:00",
+    "location": "Хан-уул",
+    "postedDays": 1,
+    "details": "Нохойг гадаа салхилуулна, 1-2 нохойтой, 1 цаг тутамд 5,000₮"
+  },
+  {
+    "id": "2",
+    "title": "Дэлгүүрийн туслах",
+    "company": "Mini Market",
+    "price": "7,000₮/цаг",
+    "priceNum": 7000,
+    "time": "09:00 - 18:00",
+    "location": "ХУД",
+    "postedDays": 2,
+    "details": "Дэлгүүрт худалдан авалт хийх, бараа зөөх"
+  },
+  {
+    "id": "3",
+    "title": "Цэвэрлэгээ",
+    "company": "Clean Home",
+    "price": "10,000₮/цаг",
+    "priceNum": 10000,
+    "time": "10:00 - 14:00",
+    "location": "БЗД",
+    "postedDays": 3,
+    "details": "Гэр / оффис цэвэрлэх, тоос соруулах, шалан арчих"
+  },
+  {
+    "id": "4",
+    "title": "Түгээлтийн ажилтан",
+    "company": "Fast Delivery",
+    "price": "8,000₮/цаг",
+    "priceNum": 8000,
+    "time": "12:00 - 20:00",
+    "location": "ЧД",
+    "postedDays": 2,
+    "details": "Сонгосон газруудад бараа хүргэх"
+  },
+  {
+    "id": "5",
+    "title": "Хүүхэд харах",
+    "company": "Kids Care",
+    "price": "6,000₮/цаг",
+    "priceNum": 6000,
+    "time": "15:00 - 19:00",
+    "location": "СБД",
+    "postedDays": 5,
+    "details": "Хүүхэдтэй тоглох, хооллох, унтуулах"
+  },
+  {
+    "id": "6",
+    "title": "Айл нүүлгэх туслах",
+    "company": "Move Pro",
+    "price": "9,000₮/цаг",
+    "priceNum": 9000,
+    "time": "09:00 - 17:00",
+    "location": "БГД",
+    "postedDays": 1,
+    "details": "Тавилга зөөх, хайрцаг ачих"
+  },
+  {
+    "id": "7",
+    "title": "Хоол хүргэлт",
+    "company": "Food Express",
+    "price": "8,500₮/цаг",
+    "priceNum": 8500,
+    "time": "11:00 - 20:00",
+    "location": "ХУД",
+    "postedDays": 6,
+    "details": "Захиалсан хоол хүргэж өгөх"
+  },
+  {
+    "id": "8",
+    "title": "Муур харах",
+    "company": "Pet House",
+    "price": "4,500₮/цаг",
+    "priceNum": 4500,
+    "time": "10:00 - 13:00",
+    "location": "СБД",
+    "postedDays": 4,
+    "details": "Муур хооллох, тоглуулах"
+  },
+  {
+    "id": "9",
+    "title": "Гадна талбай цэвэрлэх",
+    "company": "Green Yard",
+    "price": "8,000₮/цаг",
+    "priceNum": 8000,
+    "time": "08:00 - 14:00",
+    "location": "БЗД",
+    "postedDays": 3,
+    "details": "Хашаа, гадна орчин цэвэрлэх"
+  },
+  {
+    "id": "10",
+    "title": "Ахмад настанд туслах",
+    "company": "Care Plus",
+    "price": "7,500₮/цаг",
+    "priceNum": 7500,
+    "time": "13:00 - 18:00",
+    "location": "ЧД",
+    "postedDays": 7,
+    "details": "Эм авах, хүнс цуглуулах"
+  },
+  {
+    "id": "11",
+    "title": "Компьютер тохируулах",
+    "company": "IT Help",
+    "price": "12,000₮/цаг",
+    "priceNum": 12000,
+    "time": "10:00 - 16:00",
+    "location": "Хан-уул",
+    "postedDays": 2,
+    "details": "Программ суулгах, тохиргоо хийх"
+  },
+  {
+    "id": "12",
+    "title": "Тавилга угсрах",
+    "company": "Fix Home",
+    "price": "10,000₮/цаг",
+    "priceNum": 10000,
+    "time": "11:00 - 15:00",
+    "location": "БГД",
+    "postedDays": 5,
+    "details": "Ор, ширээ, сандал угсрах"
+  },
+  {
+    "id": "13",
+    "title": "Цас цэвэрлэх",
+    "company": "Winter Help",
+    "price": "9,500₮/цаг",
+    "priceNum": 9500,
+    "time": "07:00 - 12:00",
+    "location": "СХД",
+    "postedDays": 3,
+    "details": "Орц, хашааны цас цэвэрлэх"
+  },
+  {
+    "id": "14",
+    "title": "Ачаа өргөх",
+    "company": "Heavy Lift",
+    "price": "8,000₮/цаг",
+    "priceNum": 8000,
+    "time": "09:00 - 18:00",
+    "location": "БЗД",
+    "postedDays": 1,
+    "details": "Хүнд ачаа өргөж зөөх"
+  },
+  {
+    "id": "15",
+    "title": "Ном ангилах",
+    "company": "Smart Library",
+    "price": "6,500₮/цаг",
+    "priceNum": 6500,
+    "time": "10:00 - 17:00",
+    "location": "СБД",
+    "postedDays": 6,
+    "details": "Ном эмхлэх, ангилах"
+  },
+  {
+    "id": "16",
+    "title": "Машин угаах",
+    "company": "Car Wash UB",
+    "price": "8,000₮/цаг",
+    "priceNum": 8000,
+    "time": "09:00 - 14:00",
+    "location": "ХУД",
+    "postedDays": 2,
+    "details": "Машины дотор гадна цэвэрлэгээ"
+  },
+  {
+    "id": "17",
+    "title": "Хичээл давтуулах",
+    "company": "Edu Kids",
+    "price": "10,000₮/цаг",
+    "priceNum": 10000,
+    "time": "17:00 - 20:00",
+    "location": "ЧД",
+    "postedDays": 8,
+    "details": "Бага ангийн хүүхдэд хичээл заах"
+  },
+  {
+    "id": "18",
+    "title": "Зарлал тараах",
+    "company": "Promo Team",
+    "price": "6,000₮/цаг",
+    "priceNum": 6000,
+    "time": "09:00 - 15:00",
+    "location": "СХД",
+    "postedDays": 4,
+    "details": "Зар сурталчилгаа тараах"
+  },
+  {
+    "id": "19",
+    "title": "Цэцэг услах",
+    "company": "Flower Care",
+    "price": "5,000₮/цаг",
+    "priceNum": 5000,
+    "time": "08:00 - 11:00",
+    "location": "СБД",
+    "postedDays": 2,
+    "details": "Гэр, оффисын цэцэг арчлах"
+  },
+  {
+    "id": "20",
+    "title": "Бараа өрөх",
+    "company": "Store Max",
+    "price": "7,500₮/цаг",
+    "priceNum": 7500,
+    "time": "09:00 - 17:00",
+    "location": "СХД",
+    "postedDays": 5,
+    "details": "Дэлгүүрийн бараа эмхлэх"
+  },
+  {
+    "id": "21",
+    "title": "Гэрийн хоол хийх",
+    "company": "Home Chef",
+    "price": "12,000₮/цаг",
+    "priceNum": 12000,
+    "time": "16:00 - 20:00",
+    "location": "Хан-уул",
+    "postedDays": 7,
+    "details": "Өдрийн болон оройн хоол хийх"
+  },
+  {
+    "id": "22",
+    "title": "Агуулах цэгцлэх",
+    "company": "Warehouse Pro",
+    "price": "9,000₮/цаг",
+    "priceNum": 9000,
+    "time": "08:00 - 16:00",
+    "location": "БГД",
+    "postedDays": 3,
+    "details": "Хайрцаг ангилах, өрөх"
+  },
+  {
+    "id": "23",
+    "title": "Жижиг цахилгаан ажил",
+    "company": "Electric Fix",
+    "price": "13,000₮/цаг",
+    "priceNum": 13000,
+    "time": "11:00 - 17:00",
+    "location": "ХУД",
+    "postedDays": 1,
+    "details": "Чийдэн солих, жижиг засвар"
+  },
+  {
+    "id": "24",
+    "title": "Хөгжим заах",
+    "company": "Music School",
+    "price": "14,000₮/цаг",
+    "priceNum": 14000,
+    "time": "15:00 - 19:00",
+    "location": "СБД",
+    "postedDays": 4,
+    "details": "Гитар, төгөлдөр хуур заах"
+  },
+  {
+    "id": "25",
+    "title": "Заал цэвэрлэх",
+    "company": "Sport Clean",
+    "price": "8,000₮/цаг",
+    "priceNum": 8000,
+    "time": "20:00 - 23:00",
+    "location": "БЗД",
+    "postedDays": 6,
+    "details": "Спорт заал цэвэрлэх"
+  },
+  {
+    "id": "26",
+    "title": "Бэлэг боох",
+    "company": "Gift Shop",
+    "price": "6,000₮/цаг",
+    "priceNum": 6000,
+    "time": "10:00 - 15:00",
+    "location": "ЧД",
+    "postedDays": 2,
+    "details": "Бэлэг савлах, чимэглэх"
+  },
+  {
+    "id": "27",
+    "title": "Амьтны дэлгүүр туслах",
+    "company": "Pet Store",
+    "price": "7,500₮/цаг",
+    "priceNum": 7500,
+    "time": "09:00 - 17:00",
+    "location": "ХУД",
+    "postedDays": 5,
+    "details": "Амьтан хооллох, дэлгүүр цэвэрлэх"
+  },
+  {
+    "id": "28",
+    "title": "Шал угаах",
+    "company": "Clean Office",
+    "price": "7,000₮/цаг",
+    "priceNum": 7000,
+    "time": "08:00 - 13:00",
+    "location": "СБД",
+    "postedDays": 3,
+    "details": "Гэр болон оффисын шал угаах"
+  },
+  {
+    "id": "29",
+    "title": "Бараа савлах",
+    "company": "Online Shop",
+    "price": "8,500₮/цаг",
+    "priceNum": 8500,
+    "time": "09:00 - 18:00",
+    "location": "БГД",
+    "postedDays": 7,
+    "details": "Онлайн захиалгын бараа савлах"
+  },
+  {
+    "id": "30",
+    "title": "Фото зураг авах",
+    "company": "Photo Pro",
+    "price": "15,000₮/цаг",
+    "priceNum": 15000,
+    "time": "14:00 - 18:00",
+    "location": "БЗД",
+    "postedDays": 1,
+    "details": "Энгийн зураг авалт хийх"
+  }
   ]
 }

@@ -1,6 +1,5 @@
-import { useState } from "react";
-import { Routes, Route, Link } from "react-router-dom";
-
+import { useState, useEffect } from "react";
+import Chart from "chart.js/auto";
 
 export default function Dashboard() {
   const [seconds, setSeconds] = useState(0);
@@ -32,33 +31,36 @@ export default function Dashboard() {
     const ctx1 = document.getElementById("chart1");
     const ctx2 = document.getElementById("chart2");
 
-    if (ctx1) {
-      new Chart(ctx1, {
-        type: "bar",
-        data: {
-          labels: ["Даваа", "Мягмар", "Лхагва", "Пүрэв"],
-          datasets: [{ data: [6, 8, 7, 9] }],
-        },
-      });
-    }
+    if (!ctx1 || !ctx2) return;
 
-    if (ctx2) {
-      new Chart(ctx2, {
-        type: "line",
-        data: {
-          labels: ["1-р сар", "2-р сар", "3-р сар"],
-          datasets: [{ data: [450000, 520000, 680000] }],
-        },
-      });
-    }
+    const chart1 = new Chart(ctx1, {
+      type: "bar",
+      data: {
+        labels: ["Даваа", "Мягмар", "Лхагва", "Пүрэв"],
+        datasets: [{ data: [6, 8, 7, 9] }],
+      },
+    });
+
+    const chart2 = new Chart(ctx2, {
+      type: "line",
+      data: {
+        labels: ["1-р сар", "2-р сар", "3-р сар"],
+        datasets: [{ data: [450000, 520000, 680000] }],
+      },
+    });
+
+    return () => {
+      chart1.destroy();
+      chart2.destroy();
+    };
   }, []);
 
   return (
     <div className="flex bg-gray-50 min-h-screen">
 
       {/* SIDEBAR */}
-      <aside className="w-64 bg-white h-screen p-6 hidden lg:block border-r">
-        <h1 className="text-2xl font-bold mb-8">⏰ Цагын ажил</h1>
+      <aside className="w-64 bg-white h-screen p-6 hidden lg:block border-r relative">
+        <h1 className="text-2xl font-bold mb-8">⏰ Цагийн ажил</h1>
 
         <nav className="space-y-3">
           <button onClick={() => setActiveTab("available")} className="block w-full text-left">
@@ -72,7 +74,9 @@ export default function Dashboard() {
           </button>
         </nav>
 
-        <a href="/" className="absolute bottom-6">🚪 Гарах</a>
+        <a href="/" className="absolute bottom-6 text-red-500">
+          🚪 Гарах
+        </a>
       </aside>
 
       {/* MAIN */}
@@ -96,14 +100,13 @@ export default function Dashboard() {
             onClick={() => setRunning(!running)}
             className="bg-white text-blue-600 px-4 py-2 rounded"
           >
-            ▶ Start
+            ▶ Start / Stop
           </button>
         </div>
 
         {/* TABS */}
         {activeTab === "available" && (
           <div className="grid md:grid-cols-2 gap-4">
-
             <div className="bg-white p-4 rounded shadow">
               <h3 className="font-bold">Нохой салхилуулах</h3>
               <p>10,000₮/цаг</p>
@@ -118,7 +121,6 @@ export default function Dashboard() {
               <h3 className="font-bold">Гэр цэвэрлэх</h3>
               <p>15,000₮</p>
             </div>
-
           </div>
         )}
 

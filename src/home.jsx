@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-
 export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-100 text-gray-800">
@@ -10,7 +9,7 @@ export default function Home() {
 
           <div className="flex items-center gap-2 text-xl font-bold">
             ⏰ <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              Цагын Ажил
+              Worker.mn
             </span>
           </div>
 
@@ -41,8 +40,8 @@ export default function Home() {
 
         <div>
           <h1 className="text-5xl font-extrabold leading-tight">
-            <span className="text-gray-900">Хялбар</span>{" "}
-            <span className="text-blue-600">цагийн ажил</span> ол
+            <span className="text-gray-900">Цагийн ажлын нэгдсэн</span>{" "}
+            <span className="text-blue-600">цогц </span> систем
           </h1>
 
           <p className="mt-6 text-lg text-gray-600">
@@ -70,7 +69,7 @@ export default function Home() {
           <div className="absolute -inset-4 bg-gradient-to-r from-blue-400 to-purple-500 blur-3xl opacity-30 rounded-3xl"></div>
 
           <img
-            src="https://images.unsplash.com/photo-1713947505775-4e3af92a4ee7"
+            src="https://images6.alphacoders.com/744/thumb-1920-744891.png"
             className="relative rounded-2xl shadow-2xl w-full hover:scale-[1.02] transition duration-300"
             alt="hero"
           />
@@ -107,7 +106,7 @@ export default function Home() {
       </section>
 
       {/* JOBS */}
-      <section id="jobs" className="py-24 bg-slate-50">
+      <section id="jobs" className="py-24 bg-blue-200">
         <div className="max-w-6xl mx-auto px-6 text-center">
 
           <h2 className="text-4xl font-bold mb-12">Шинэ ажлууд</h2>
