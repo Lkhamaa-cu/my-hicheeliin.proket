@@ -341,6 +341,5 @@
       "postedDays": 6,
       "details": "Энгийн зураг авалт хийх"
     }
-  ],
-  "$schema": "./node_modules/json-server/schema.json"
+  ]
 }
