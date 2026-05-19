@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import { Chart, registerables } from "chart.js";
 Chart.register(...registerables);
 
-
 function useTimer() {
   const [seconds, setSeconds] = useState(0);
   const [running, setRunning] = useState(false);
@@ -42,7 +41,7 @@ function JobCard({ job }) {
     <div className="bg-white border border-gray-100 rounded-2xl p-4 flex flex-col gap-2 hover:shadow-md transition-shadow duration-200">
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-2xl">{job.icon}</span>
+          <span className="text-2xl">{job.icon || "💼"}</span>
           <div>
             <h3 className="font-semibold text-gray-900 text-sm leading-tight">
               {job.title}
@@ -210,9 +209,7 @@ function AnalyticsTab({ analytics }) {
   );
 }
 
-// =====================
-// HISTORY TAB
-// =====================
+
 function HistoryTab({ history }) {
   return (
     <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden">
@@ -258,31 +255,37 @@ function HistoryTab({ history }) {
   );
 }
 
-
 const navItems = [
   { key: "available", label: "Нүүр", icon: "🏠" },
   { key: "history", label: "Ажлууд", icon: "💼" },
   { key: "analytics", label: "Тайлан", icon: "📊" },
 ];
 
-
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("available");
   const { seconds, running, setRunning, formatTime, reset } = useTimer();
 
-  // ---- DB.JSON FETCH ----
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/jobs")
-      .then((res) => {
-        if (!res.ok) throw new Error("db.json уншихад алдаа гарлаа");
+    const token = localStorage.getItem("token");
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+    // ✅ Хоёр API-г зэрэг дуудна — http://localhost:5000 хэрэггүй, proxy ажиллана
+    Promise.all([
+      fetch("/api/jobs").then((res) => {
+        if (!res.ok) throw new Error("Ажлын мэдээлэл татахад алдаа гарлаа");
         return res.json();
-      })
-      .then((jobs) => {
-        setData({jobs});
+      }),
+      fetch("/api/dashboard", { headers }).then((res) => {
+        if (!res.ok) throw new Error("Dashboard мэдээлэл татахад алдаа гарлаа");
+        return res.json();
+      }),
+    ])
+      .then(([jobs, dashboard]) => {
+        setData({ jobs, ...dashboard });
         setLoading(false);
       })
       .catch((err) => {
@@ -294,7 +297,10 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <p className="text-gray-400 text-sm animate-pulse">Ачааллаж байна...</p>
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+          <p className="text-gray-400 text-sm">Ачааллаж байна...</p>
+        </div>
       </div>
     );
   }
@@ -302,12 +308,25 @@ export default function Dashboard() {
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <p className="text-red-400 text-sm">⚠️ {error}</p>
+        <div className="text-center">
+          <p className="text-red-400 text-sm mb-2">⚠️ {error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="text-xs text-blue-600 underline"
+          >
+            Дахин оролдох
+          </button>
+        </div>
       </div>
     );
   }
 
   const { jobs, history, stats, analytics } = data;
+
+  // localStorage-с хэрэглэгчийн нэр авах
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const userName = user.name || "Хэрэглэгч";
+  const userInitial = userName.charAt(0).toUpperCase();
 
   return (
     <div className="flex bg-gray-50 min-h-screen font-sans">
@@ -338,26 +357,30 @@ export default function Dashboard() {
         <div className="border-t border-gray-100 pt-4 mt-4">
           <div className="flex items-center gap-3 px-3 py-2 mb-3">
             <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold">
-              Б
+              {userInitial}
             </div>
             <div>
-              <p className="text-xs font-semibold text-gray-800">Болд</p>
+              <p className="text-xs font-semibold text-gray-800">{userName}</p>
               <p className="text-xs text-gray-400">{stats.rating} ⭐ үнэлгээ</p>
             </div>
           </div>
-          <a
-            href="/"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-red-400 hover:bg-red-50 hover:text-red-500 transition-all"
+          <button
+            onClick={() => {
+              localStorage.removeItem("token");
+              localStorage.removeItem("user");
+              window.location.href = "/";
+            }}
+            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm text-red-400 hover:bg-red-50 hover:text-red-500 transition-all"
           >
             🚪 Гарах
-          </a>
+          </button>
         </div>
       </aside>
 
       {/* ---- MAIN ---- */}
       <main className="flex-1 p-6 max-w-5xl">
         <h1 className="text-2xl font-bold text-gray-900 mb-6">
-          Сайн байна уу 👋
+          Сайн байна уу, {userName} 👋
         </h1>
 
         {/* STATS */}
