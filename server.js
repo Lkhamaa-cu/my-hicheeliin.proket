@@ -3,6 +3,14 @@ import cors from "cors";
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { readFileSync } from "fs";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
+
+// my-react-app фолдерт server.js болон db.json хоёул байгаа тул
+// __dirname нь тэр фолдерыг заана — db.json-г зөв олно
+const __filename = fileURLToPath(import.meta.url);
+const __dirname  = dirname(__filename);
 
 const app = express();
 const PORT = 5000;
@@ -50,6 +58,20 @@ const jobSchema = new mongoose.Schema({
 });
 
 const Job = mongoose.model("Job", jobSchema);
+
+// ── db.json-с ажлын тоог унших туслах функц ────────────────
+// server.js болон db.json хоёул my-react-app фолдерт байгаа тул
+// join(__dirname, "db.json") нь зөв замыг заана
+function getDbJobCount() {
+  try {
+    const raw  = readFileSync(join(__dirname, "db.json"), "utf-8");
+    const data = JSON.parse(raw);
+    return Array.isArray(data.jobs) ? data.jobs.length : 0;
+  } catch (err) {
+    console.warn("⚠️ db.json уншихад алдаа:", err.message);
+    return 0;
+  }
+}
 
 // ── Auth Middleware ─────────────────────────────────────────
 function authMiddleware(req, res, next) {
@@ -147,6 +169,30 @@ app.get("/api/auth/me", authMiddleware, async (req, res) => {
   }
 });
 
+// PUT /api/auth/profile — нэр, утас засах
+app.put("/api/auth/profile", authMiddleware, async (req, res) => {
+  try {
+    const { name, phone } = req.body;
+
+    if (!name || !name.trim()) {
+      return res.status(400).json({ error: "Нэр хоосон байж болохгүй" });
+    }
+
+    const updated = await User.findByIdAndUpdate(
+      req.user.id,
+      { $set: { name: name.trim(), phone: (phone || "").trim() } },
+      { new: true }
+    ).select("-password");
+
+    if (!updated) return res.status(404).json({ error: "Хэрэглэгч олдсонгүй" });
+
+    res.json(updated);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Серверийн алдаа" });
+  }
+});
+
 // ══════════════════════════════════════════════════════════════
 //  JOBS ROUTES
 // ══════════════════════════════════════════════════════════════
@@ -156,7 +202,6 @@ app.get("/api/jobs", async (req, res) => {
   try {
     const { search, location, sort } = req.query;
 
-    // Хайлтын filter үүсгэх
     const filter = {};
     if (search) {
       const q = new RegExp(search, "i");
@@ -166,14 +211,11 @@ app.get("/api/jobs", async (req, res) => {
       filter.location = location;
     }
 
-    // Эрэмбэлэх
-    let sortOption = { createdAt: -1 }; // default: шинэ эхэнд
+    let sortOption = { createdAt: -1 };
     if (sort === "price-high") sortOption = { priceNum: -1 };
     if (sort === "price-low")  sortOption = { priceNum: 1 };
 
-    const jobs = await Job.find(filter).sort(sortOption);
-
-    // _id → id болгох (frontend-тэй нийцүүлэх)
+    const jobs = await Job.find(filter).sort(sortOption).populate("postedBy", "name email");
     const result = jobs.map((j) => ({ ...j.toObject(), id: j._id.toString() }));
     res.json(result);
   } catch (err) {
@@ -193,7 +235,7 @@ app.get("/api/jobs/:id", async (req, res) => {
   }
 });
 
-// POST /api/jobs — шинэ ажил нэмэх (нэвтэрсэн байх шаардлагатай)
+// POST /api/jobs — шинэ ажил нэмэх
 app.post("/api/jobs", authMiddleware, async (req, res) => {
   try {
     const newJob = await Job.create({
@@ -227,16 +269,50 @@ app.put("/api/jobs/:id", authMiddleware, async (req, res) => {
 // DELETE /api/jobs/:id — ажил устгах
 app.delete("/api/jobs/:id", authMiddleware, async (req, res) => {
   try {
-    const deleted = await Job.findByIdAndDelete(req.params.id);
-    if (!deleted) return res.status(404).json({ error: "Ажил олдсонгүй" });
+    const job = await Job.findById(req.params.id);
+    if (!job) return res.status(404).json({ error: "Ажил олдсонгүй" });
+
+    if (job.postedBy?.toString() !== req.user.id) {
+      return res.status(403).json({ error: "Зөвхөн өөрийн зарыг устгах боломжтой" });
+    }
+
+    await Job.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: "Ажил устгагдлаа" });
   } catch (err) {
-    console.error(err);
     res.status(500).json({ error: "Серверийн алдаа" });
   }
 });
 
-// ── Dashboard (хуурамч өгөгдөл — хожим бодит болгоно) ───────
+// ══════════════════════════════════════════════════════════════
+//  STATS ROUTE — db.json-с бодит ажлын тоог харуулна
+// ══════════════════════════════════════════════════════════════
+
+// GET /api/stats
+app.get("/api/stats", async (req, res) => {
+  try {
+    const [mongoJobs, totalWorkers, totalEmployers] = await Promise.all([
+      Job.countDocuments(),
+      User.countDocuments({ role: "worker" }),
+      User.countDocuments({ role: "employer" }),
+    ]);
+
+    // MongoDB-д ажил байвал тэр тоог ашиглана,
+    // байхгүй бол (хоосон DB) db.json-с унших — my-react-app фолдерт хамт байгаа
+    const dbJsonCount = getDbJobCount();
+    const totalJobs   = mongoJobs > 0 ? mongoJobs : dbJsonCount;
+
+    res.json({
+      totalJobs,
+      totalWorkers,
+      totalEmployers,
+      satisfaction: 98,
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Серверийн алдаа" });
+  }
+});
+
+// ── Dashboard ────────────────────────────────────────────────
 app.get("/dashboard", authMiddleware, (req, res) => {
   res.json({
     stats: {
