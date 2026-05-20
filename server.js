@@ -3,6 +3,7 @@ import cors from "cors";
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import path from "path";
 import { readFileSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
@@ -327,6 +328,11 @@ app.get("/dashboard", authMiddleware, (req, res) => {
       { id: 2, title: "Дэлгүүрийн туслах", company: "Mini Market", hours: 8, income: "56,000₮", date: "2026-05-08", status: "Дууссан" },
     ],
   });
+});
+
+app.use(express.static(path.join(__dirname, "dist")));
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "dist", "index.html"));
 });
 
 app.listen(PORT, () => {
