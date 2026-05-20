@@ -3,7 +3,7 @@ import Home from "./home";
 import Login from "./login";
 import Register from "./register";
 import Dashboard from "./dashboard";
-import Jobs from "./jobs";
+import Jobs from "./Jobs";
 
 function App() {
   return (
